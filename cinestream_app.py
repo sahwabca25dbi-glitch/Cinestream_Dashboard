@@ -15,7 +15,7 @@ st.set_page_config(
 
 @st.cache_data(ttl=600)
 def load_data():
-    df = pd.read_csv("outputs\cleaned_cinestream.csv")
+    df = pd.read_csv("outputs/cleaned_cinestream.csv")
     df["AddedDate"] = pd.to_datetime(df["AddedDate"], errors="coerce")
     return df
 
@@ -432,3 +432,22 @@ Use the filters in the sidebar to explore different content.
 - **Money** – Revenue and production cost summary.
 - **Quality Alerts** – Example JSON view of a content record.
 """)
+
+# ===== Module 6 Extra Status (Best/Worst Language) =====
+# Place this block at the end of the Genres & Languages tab if not already present.
+st.markdown("---")
+language_perf = (
+    filtered.groupby("Language")
+    .agg(TotalViews=("ViewsMillions","sum"), Titles=("Title","count"))
+)
+language_perf["ViewsPerTitle"] = language_perf["TotalViews"] / language_perf["Titles"]
+best = language_perf["ViewsPerTitle"].idxmax()
+worst = language_perf["ViewsPerTitle"].idxmin()
+st.success(
+    f"🏆 Best-performing language: **{best}** "
+    f"({language_perf.loc[best,'ViewsPerTitle']:.2f} views/title)"
+)
+st.warning(
+    f"📉 Lowest-performing language: **{worst}** "
+    f"({language_perf.loc[worst,'ViewsPerTitle']:.2f} views/title)"
+)
